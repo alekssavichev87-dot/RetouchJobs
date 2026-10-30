@@ -24,7 +24,7 @@ compose.desktop {
             targetFormats(TargetFormat.Exe, TargetFormat.Msi)
             packageName = "RetouchJobs"
             packageVersion = "1.0.0"
-            description = "Поиск актуальных вакансий через Serper.dev"
+            description = "Job search app powered by Serper.dev"
             vendor = "alekssavichev87-dot"
             includeAllModules = true
 
