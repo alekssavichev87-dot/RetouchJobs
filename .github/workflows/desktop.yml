@@ -32,6 +32,15 @@ jobs:
         continue-on-error: true
         run: gradle packageExe packageMsi --no-daemon
 
+      - name: Show jpackage logs
+        if: failure()
+        shell: pwsh
+        run: |
+          Get-ChildItem build/compose/logs -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object {
+            "=== $($_.FullName)"
+            Get-Content $_.FullName
+          }
+
       - name: Zip portable app
         shell: pwsh
         run: Compress-Archive -Path build/compose/binaries/main/app/RetouchJobs -DestinationPath RetouchJobs-portable-windows.zip
