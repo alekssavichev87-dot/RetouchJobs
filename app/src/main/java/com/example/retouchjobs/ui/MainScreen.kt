@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoFixHigh
 import androidx.compose.material.icons.rounded.Code
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,6 +51,7 @@ import com.example.retouchjobs.data.Vacancy
 private fun Category.icon(): ImageVector = when (this) {
     Category.RETOUCH -> Icons.Rounded.AutoFixHigh
     Category.DEV -> Icons.Rounded.Code
+    Category.DESIGN -> Icons.Rounded.Palette
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

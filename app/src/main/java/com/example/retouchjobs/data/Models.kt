@@ -65,7 +65,7 @@ enum class Category(
         goodLabel = "Про ретушь",
     ),
     DEV(
-        tabLabel = "Android / вайбкод",
+        tabLabel = "Android",
         screenTitle = "Android и вайбкодинг",
         heroTitle = "Вакансии для Android-разработчика и вайбкодера",
         heroText = "Kotlin, Jetpack Compose и разработка с помощью ИИ. " +
@@ -83,6 +83,31 @@ enum class Category(
         context = listOf(
             "compose", "jetpack", "kotlin", "котлин", "вайбкод", "вайб-код", "vibe",
             "cursor", "claude", "нейросет", "llm", "copilot",
+        ),
+        exactLabel = "Точное совпадение",
+        goodLabel = "По теме",
+    ),
+    DESIGN(
+        tabLabel = "Дизайн",
+        screenTitle = "Дизайн карточек",
+        heroTitle = "Вакансии дизайнера карточек товаров",
+        heroText = "Карточки и инфографика для Wildberries, Ozon и других маркетплейсов. " +
+            "Ищем по всему интернету, кроме крупных job-бордов.",
+        queries = listOf(
+            "вакансия дизайнер карточек товаров для маркетплейсов",
+            "дизайнер инфографики для Wildberries Ozon требуется",
+            "нужен дизайнер карточек товаров WB Ozon Яндекс Маркет работа",
+            "marketplace product card designer infographic vacancy",
+        ),
+        primary = listOf(
+            "дизайнер карточ", "дизайн карточ", "дизайнер инфограф", "дизайнер маркетплейс",
+            "дизайнер wb", "дизайнер ozon", "дизайнер озон", "дизайнер вайлдберриз",
+            "карточек товар", "карточки товар", "инфографик",
+            "product card", "listing design",
+        ),
+        context = listOf(
+            "маркетплейс", "wildberries", "вайлдберриз", "ozon", "озон",
+            "яндекс маркет", "яндекс.маркет", "marketplace", "amazon",
         ),
         exactLabel = "Точное совпадение",
         goodLabel = "По теме",
