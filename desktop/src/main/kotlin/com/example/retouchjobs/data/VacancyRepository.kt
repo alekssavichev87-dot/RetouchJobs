@@ -41,7 +41,7 @@ class VacancyRepository(private val client: SerperClient) {
     }
 
     private fun toVacancy(r: OrganicResult, blocked: List<String>, category: Category): Vacancy? {
-        if (r.link.isBlank()) return null
+        if (!r.link.startsWith("http://") && !r.link.startsWith("https://")) return null
         val host = runCatching { URI(r.link).host }.getOrNull()
             ?.lowercase()?.removePrefix("www.") ?: return null
         if (blocked.any { host == it || host.endsWith(".$it") }) return null
@@ -65,6 +65,7 @@ class VacancyRepository(private val client: SerperClient) {
             isVacancy = VACANCY_WORDS.any { it in text },
             rank = r.position ?: Int.MAX_VALUE,
             contacts = ContactExtractor.fromText("${r.title} ${r.snippet}"),
+            remote = PageAnalyzer.remoteFromText(text),
         )
     }
 

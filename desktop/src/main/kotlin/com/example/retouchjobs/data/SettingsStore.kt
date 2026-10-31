@@ -18,16 +18,25 @@ data class Settings(
     val autoContacts: Boolean = true,
 )
 
-/**
- * Настройки лежат в файле %APPDATA%\RetouchJobs\settings.properties
- * (на других системах — в домашней папке пользователя). Только на этом компьютере.
- */
-class SettingsStore {
-    private val file: File = run {
+/** Папка данных приложения: %APPDATA%\RetouchJobs (на других системах — домашняя папка). */
+object AppDirs {
+    val dir: File by lazy {
         val base = System.getenv("APPDATA")?.takeIf { it.isNotBlank() }
             ?: System.getProperty("user.home")
-        File(File(base, "RetouchJobs"), "settings.properties")
+        File(base, "RetouchJobs").also { it.mkdirs() }
     }
+}
+
+/**
+ * Настройки лежат в %APPDATA%\RetouchJobs\settings.properties. API-ключ в этом файле
+ * хранится только в зашифрованном виде (Windows DPAPI), открытым текстом его там нет.
+ */
+class SettingsStore {
+    private val file = File(AppDirs.dir, "settings.properties")
+
+    // Чтобы не запускать шифрование при каждом нажатии на фильтр, помним последний результат.
+    private var cachedKey: String = ""
+    private var cachedEnc: String? = null
 
     private val _settings = MutableStateFlow(load())
     val settings: StateFlow<Settings> = _settings.asStateFlow()
@@ -37,8 +46,15 @@ class SettingsStore {
         runCatching {
             if (file.isFile) file.reader(Charsets.UTF_8).use { p.load(it) }
         }
-        return Settings(
-            apiKey = p.getProperty("api_key").orEmpty(),
+
+        val enc = p.getProperty("api_key_dpapi")
+        val legacy = p.getProperty("api_key").orEmpty()
+        val key = enc?.let { WindowsDpapi.unprotect(it) } ?: legacy
+        cachedKey = key
+        cachedEnc = enc?.takeIf { key.isNotEmpty() && key != legacy }
+
+        val settings = Settings(
+            apiKey = key,
             blockedDomains = p.getProperty("blocked_domains") ?: DEFAULT_BLOCKED_DOMAINS,
             period = p.getProperty("period")
                 ?.let { runCatching { Period.valueOf(it) }.getOrNull() }
@@ -47,11 +63,28 @@ class SettingsStore {
             remote = p.getProperty("remote")?.toBooleanStrictOrNull() ?: false,
             autoContacts = p.getProperty("auto_contacts")?.toBooleanStrictOrNull() ?: true,
         )
+
+        // Миграция: ключ, сохранённый старой версией открытым текстом, шифруем и убираем из файла.
+        if (legacy.isNotEmpty() && enc == null) save(settings)
+        return settings
     }
 
     private fun save(s: Settings) {
+        val encrypted = when {
+            s.apiKey.isEmpty() -> null
+            s.apiKey == cachedKey && cachedEnc != null -> cachedEnc
+            else -> WindowsDpapi.protect(s.apiKey)
+        }
+        cachedKey = s.apiKey
+        cachedEnc = encrypted
+
         val p = Properties().apply {
-            setProperty("api_key", s.apiKey)
+            when {
+                s.apiKey.isEmpty() -> Unit
+                encrypted != null -> setProperty("api_key_dpapi", encrypted)
+                // Шифрование недоступно: лучше сохранить ключ, чем потерять.
+                else -> setProperty("api_key", s.apiKey)
+            }
             setProperty("blocked_domains", s.blockedDomains)
             setProperty("period", s.period.name)
             setProperty("only_vacancies", s.onlyVacancies.toString())

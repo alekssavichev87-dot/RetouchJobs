@@ -83,7 +83,7 @@ fun SettingsSheet(
                         PasswordVisualTransformation()
                     },
                     supportingText = {
-                        Text("Ключ берётся в кабинете serper.dev и хранится только на этом компьютере.")
+                        Text("Ключ берётся в кабинете serper.dev и хранится на компьютере в зашифрованном виде (защита Windows, DPAPI).")
                     },
                 )
 
@@ -107,10 +107,10 @@ fun SettingsSheet(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Искать контакты автоматически", style = MaterialTheme.typography.bodyLarge)
+                        Text("Проверять объявления автоматически", style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            text = "После поиска приложение откроет страницы объявлений и найдёт телефоны, " +
-                                "e-mail и мессенджеры. Расходует трафик — можно отключить и искать по кнопке.",
+                            text = "После поиска приложение откроет страницы объявлений: найдёт контакты, проверит, " +
+                                "не закрыта ли вакансия и можно ли работать удалённо. Расходует трафик — можно отключить и проверять по кнопке.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

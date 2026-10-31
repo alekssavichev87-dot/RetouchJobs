@@ -71,11 +71,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import com.example.retouchjobs.data.Category
 import com.example.retouchjobs.data.Contact
 import com.example.retouchjobs.data.ContactType
+import com.example.retouchjobs.data.ListingStatus
 import com.example.retouchjobs.data.Match
 import com.example.retouchjobs.data.Period
+import com.example.retouchjobs.data.RemoteStatus
 import com.example.retouchjobs.data.Settings
 import com.example.retouchjobs.data.Vacancy
 
@@ -316,6 +322,7 @@ fun VacancyCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+            CheckRow(vacancy)
             ContactsSection(
                 vacancy = vacancy,
                 state = contacts,
@@ -386,7 +393,7 @@ private fun ContactsSection(
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
                 Text(
-                    text = "Ищем контакты на странице…",
+                    text = "Проверяем страницу объявления…",
                     style = MaterialTheme.typography.labelMedium,
                     color = cs.onSurfaceVariant,
                 )
@@ -422,7 +429,7 @@ private fun ContactsSection(
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text("Найти контакты")
+                    Text("Проверить объявление")
                 }
             }
         }
@@ -458,6 +465,85 @@ private fun DomainAvatar(domain: String) {
             fontWeight = FontWeight.Bold,
             color = fg,
         )
+    }
+}
+
+private val foundFormat: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("ru"))
+
+private fun formatFound(ms: Long): String =
+    Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()).format(foundFormat)
+
+/** Статус вакансии и условия удалёнки. «Не проверена» и «не установлено» — это не «да». */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CheckRow(vacancy: Vacancy) {
+    val cs = MaterialTheme.colorScheme
+    val check = vacancy.check
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            when (check?.status) {
+                ListingStatus.CONFIRMED -> InfoBadge(
+                    "Открыта: подтверждено", cs.primaryContainer, cs.onPrimaryContainer, Icons.Rounded.Verified,
+                )
+                ListingStatus.STALE -> InfoBadge(
+                    "Возможно устарела", cs.tertiaryContainer, cs.onTertiaryContainer,
+                )
+                ListingStatus.CLOSED -> InfoBadge(
+                    "Закрыта", cs.errorContainer, cs.onErrorContainer,
+                )
+                ListingStatus.UNVERIFIED -> InfoBadge(
+                    "Актуальность не подтверждена", cs.surfaceVariant, cs.onSurfaceVariant,
+                )
+                null -> InfoBadge(
+                    "Страница не проверена", cs.surfaceVariant, cs.onSurfaceVariant,
+                )
+            }
+            when (vacancy.remote) {
+                RemoteStatus.YES -> InfoBadge(
+                    "Удалённо: да", cs.secondaryContainer, cs.onSecondaryContainer,
+                )
+                RemoteStatus.NO -> InfoBadge(
+                    "Удалённо: нет", cs.errorContainer, cs.onErrorContainer,
+                )
+                RemoteStatus.UNKNOWN -> InfoBadge(
+                    "Удалённо: не установлено", cs.surfaceVariant, cs.onSurfaceVariant,
+                )
+            }
+        }
+
+        val meta = listOfNotNull(
+            vacancy.foundAt.takeIf { it > 0 }?.let { "Найдено ${formatFound(it)}" },
+            check?.postedDaysAgo?.let { if (it == 0) "опубликовано сегодня" else "опубликовано $it дн. назад" },
+            check?.note,
+        ).joinToString(" · ")
+        if (meta.isNotEmpty()) {
+            Text(
+                text = meta,
+                style = MaterialTheme.typography.labelSmall,
+                color = cs.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun InfoBadge(label: String, bg: Color, fg: Color, icon: ImageVector? = null) {
+    Surface(shape = RoundedCornerShape(50), color = bg, contentColor = fg) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) {
+                Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp))
+                Spacer(Modifier.width(4.dp))
+            }
+            Text(text = label, style = MaterialTheme.typography.labelMedium)
+        }
     }
 }
 

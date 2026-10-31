@@ -116,6 +116,7 @@ enum class Category(
 
 enum class Match { EXACT, GOOD, WEAK }
 
+@Serializable
 data class Vacancy(
     val title: String,
     val url: String,
@@ -126,4 +127,10 @@ data class Vacancy(
     val isVacancy: Boolean,
     val rank: Int,
     val contacts: List<Contact> = emptyList(),
+    /** Можно ли удалённо: по сниппету, затем уточняется по странице. */
+    val remote: RemoteStatus = RemoteStatus.UNKNOWN,
+    /** Результат проверки страницы объявления; null — страница ещё не проверялась. */
+    val check: PageCheck? = null,
+    /** Когда вакансия впервые попалась в поиске (мс), 0 — неизвестно. */
+    val foundAt: Long = 0L,
 )

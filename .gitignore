@@ -1,0 +1,27 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Файлы подписи и ключи — никогда не коммитим
+*.jks
+*.keystore
+keystore.properties
+secrets.properties
+
+# Сборки
+*.apk
+*.aab
+*.ap_
+
+# Мусор ОС
+.DS_Store
+Thumbs.db

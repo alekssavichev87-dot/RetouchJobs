@@ -1,10 +1,12 @@
 package com.example.retouchjobs.data
 
+import kotlinx.serialization.Serializable
 import java.net.URLDecoder
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 enum class ContactType { PHONE, WHATSAPP, TELEGRAM, EMAIL, VK }
 
+@Serializable
 data class Contact(
     val type: ContactType,
     val label: String,
@@ -96,7 +98,7 @@ object ContactExtractor {
 
     fun merge(a: List<Contact>, b: List<Contact>): List<Contact> = finalize(a + b)
 
-    private fun htmlToText(html: String): String =
+    fun htmlToText(html: String): String =
         html.replace(scriptRe, " ")
             .replace(tagRe, " ")
             .replace("&nbsp;", " ")

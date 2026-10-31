@@ -47,7 +47,9 @@ import androidx.compose.ui.unit.dp
 import com.example.retouchjobs.data.Category
 import com.example.retouchjobs.data.Contact
 import com.example.retouchjobs.data.ContactType
+import com.example.retouchjobs.data.ListingStatus
 import com.example.retouchjobs.data.Match
+import com.example.retouchjobs.data.RemoteStatus
 import com.example.retouchjobs.data.SerperException
 import com.example.retouchjobs.data.Settings
 import kotlinx.coroutines.launch
@@ -98,11 +100,14 @@ fun MainScreen(vm: MainViewModel) {
     val state = states.getValue(category)
     val cfg: Settings? = settings
     val strictFilter = cfg?.onlyVacancies != false
-    val visible = remember(state.items, strictFilter) {
-        if (strictFilter) {
-            state.items.filter { it.isVacancy && it.match != Match.WEAK }
-        } else {
-            state.items
+    val remoteOnly = cfg?.remote == true
+    val visible = remember(state.items, strictFilter, remoteOnly) {
+        state.items.filter { v ->
+            val listingOk = !strictFilter ||
+                (v.isVacancy && v.match != Match.WEAK && v.check?.status != ListingStatus.CLOSED)
+            // «Не установлено» не отсекаем: только явное «нельзя удалённо».
+            val remoteOk = !remoteOnly || v.remote != RemoteStatus.NO
+            listingOk && remoteOk
         }
     }
 
